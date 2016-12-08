@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "cheerio": "^0.22.0",
+    "node-geocoder": "^3.15.1"
+  }
+}

@@ -19,48 +19,34 @@ var innerArray = [];
 
 
 fs.readFile('stores-single-city-keelung.html', 'utf8', (err, data) => {
-  
   if (err) throw err;
-
   // load html
   $ = cheerio.load(data);
-  
-
-
   city = $('.blog-title').text();
-  
 
   cards = $('.city-card');
 
-  cards.each(function(i, elem) {
-    outerArray[i] = $(this).children();
-    
-    temp = outerArray[i].each(function(j, elem) {
-      innerArray[j] = $(this).text();
-      
-      if(j==1) {
-        
-        var tempForAddr = city+innerArray[j];
+  var counter = 0
+  var cardsSize = cards.length
 
-        geocoder.geocode( tempForAddr )
-        .then(function(res) {
-          console.log( i, tempForAddr, res[0].latitude, res[0].longitude, innerArray[j+1] );
-        })
-        .catch(function(err) {
-          console.log(err);
-        });
+  cards.each(function(i, card) {
+    var addr = $(this).find('div').eq(1).text()
 
-      }
-
-    });
-    
+    // create closure
+    ;(function (order, card) {
+      geocoder.geocode(addr, function (err, data) {
+        // 這個結果不會照順序回來但是我不在乎
+        // 因為我知道這個 request 在 cards 中的原本的順序
+        console.log("formatted addr: %s\n order: %d\n", data[0].formattedAddress, order)
+        console.log($('.city-card').eq(order).find('div').eq(1).text())
+        $('.city-card').eq(order).find('div').eq(1).text(data[0].formattedAddress)
+        counter++
+        if (cardsSize === counter) {
+          console.log('done')
+          // render ...
+          // console.log($.html())
+        }
+      })
+    })(i, card)
   });
-
-  // Write file
-
-  // fs.writeFile('fruits.html', $.html(), (err) => {
-  //   if (err) throw err;
-  //   console.log('It\'s saved!');
-  // });
-
 });
